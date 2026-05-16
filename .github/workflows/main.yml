@@ -1,32 +1,61 @@
-name: Node.js CI
+name: Advanced GitHub Actions Example
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+
+# -----------------------------------
+# Workflow Environment Variables
+# -----------------------------------
+env:
+  CUSTOM_VAR: value
 
 jobs:
-  build:
+
+  # -----------------------------------
+  # Example Job: Environment Variables
+  # -----------------------------------
+  example:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x]
+    steps:
+      - name: Use environment variable
+        run: echo $CUSTOM_VAR
+
+  # -----------------------------------
+  # Deployment Job with Secrets
+  # -----------------------------------
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Use secret
+        run: |
+          echo "Access Token: ${{ secrets.ACCESS_TOKEN }}"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+  # -----------------------------------
+  # Conditional Job
+  # -----------------------------------
+  conditional-job:
+    runs-on: ubuntu-latest
 
-      - name: Install dependencies
-        run: npm ci
+    if: github.event_name == 'push' &&
+        github.ref == 'refs/heads/main'
 
-      - name: Build application
-        run: npm run build --if-present
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Run tests
-        run: npm test
+  # -----------------------------------
+  # Step Outputs Example
+  # -----------------------------------
+  outputs-example:
+    runs-on: ubuntu-latest
+
+    steps:
+      - id: step-one
+        run: echo "value=hello" >> $GITHUB_OUTPUT
+
+      - id: step-two
+        run: |
+          echo "Received value from previous step: ${{ steps.step-one.outputs.value }}"
